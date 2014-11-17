@@ -1,0 +1,46 @@
+
+            using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Text.RegularExpressions;
+
+namespace stemming1
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            string input = "I inform that I am informative as I have information . ";
+            string[] instances = input.Split(' ');
+            StringBuilder result1 = new StringBuilder();          
+            string[] suffixes = { "ation", "ative" };
+            for (int i = 0; i < instances.Length - 1; i++)
+            {
+                for (int j = 0; j < suffixes.Length; j++)
+                {
+                    if (instances[i].EndsWith(suffixes[j]))
+                    {
+
+                      
+                        int length = instances[i].Length - suffixes[j].Length;
+                        string ints = instances[i];
+                        instances[i] = instances[i].Replace(instances[i], instances[i].Substring(0, length));
+                        
+                    }
+                }
+            }
+            foreach (string str in instances)
+            {
+                result1.Append(str);
+                result1.Append(" ");
+            }
+           
+
+            Console.WriteLine(result1);
+            Console.Read();
+
+        }
+    }
+}

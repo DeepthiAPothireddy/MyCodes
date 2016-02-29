@@ -60,23 +60,26 @@ public class rd {
 			double maximum = 0;
 			String maximumlocation = null;
 			String maximumcontent = null;
-			int contentmax = 0;
-			double total = 0;
 			String[] columns = Sc.nextLine().split("\t");
 			String[] locations = columns[1].split(",");
 			for(int i = 0; i<locations.length; i++){
+				double total = 0;
+				int contentmax = 0;
 				String location = locations[i];
 				if(contentallocation.containsKey(location)){
 					if(contentallocation.get(location).containsKey(Integer.parseInt(columns[0]))){
 						content = contentallocation.get(location).get(Integer.parseInt(columns[0]));
+						System.out.println(content);
 						for(int j = 0; j<content.size(); j++){
 							int weight = 0;
 							if(contentweight.containsKey(content.get(j))){
 								weight = contentweight.get(content.get(j));
+								System.out.println(weight +""+content.get(j));
 							}
 							if(contentmax < weight){
 								contentmax = weight;
 								maximumcontent = content.get(j);
+								System.out.println(contentmax +" "+maximumcontent);
 							}
 						}
 					}
@@ -86,11 +89,14 @@ public class rd {
 					total = 0.2 * contentmax;
 					break;
 				case "topright":
-					total = 0.7 * contentmax;
+					total = 0.1 * contentmax;
 				}
+				System.out.println(total);
 				if(maximum < total){
+					System.out.println(maximum+""+total+""+""+location);
 					maximum = total;
 					maximumlocation = location;
+					System.out.println(maximumlocation+""+location);
 				}
 			}
 			System.out.println(maximum + " for "+columns[0]+" for "+maximumlocation + " for "+maximumcontent);

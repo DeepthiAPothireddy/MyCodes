@@ -71,12 +71,12 @@ public class rd {
 						content = contentallocation.get(location).get(Integer.parseInt(columns[0]));
 						for(int j = 0; j<content.size(); j++){
 							int weight = 0;
-							if(contentweight.containsKey(content.get(i))){
-								weight = contentweight.get(content.get(i));
+							if(contentweight.containsKey(content.get(j))){
+								weight = contentweight.get(content.get(j));
 							}
 							if(contentmax < weight){
 								contentmax = weight;
-								maximumcontent = content.get(i);
+								maximumcontent = content.get(j);
 							}
 						}
 					}

@@ -1,0 +1,193 @@
+import java.io.*;
+import java.util.*;
+
+
+public class rd {
+
+	public void sch(Map<String, Map<Integer, ArrayList<String>>> contentallocation, Map<String, ArrayList<String>> contentlocation) throws IOException{
+		ArrayList<String> invalidLocation = new ArrayList<String>();
+		for(Map.Entry<String, ArrayList<String>> entry: contentlocation.entrySet()){
+			Set<String> set = new HashSet<String>(entry.getValue());
+			if(set.size() < entry.getValue().size()){
+				System.out.println(entry.getKey() + " Has duplicate content hence invalid schedule");
+				invalidLocation.add(entry.getKey());
+			}
+		}
+		for(Map.Entry<String, Map<Integer, ArrayList<String>>> entry: contentallocation.entrySet()){
+			if(!invalidLocation.contains(entry.getKey())){
+				Map<Integer, ArrayList<String>> contenttime = entry.getValue();
+				for(Map.Entry<Integer, ArrayList<String>> entry1 : contenttime.entrySet()){
+					if(entry1.getValue().size()>3){
+						System.out.println(entry.getKey() + " : time "+entry1.getKey()+" has more than 3 requests");
+						invalidLocation.add(entry.getKey());
+					}
+				}
+			}
+		}
+		Scanner sc = new Scanner(new FileReader("C:\\Users\\deept\\OneDrive\\Documents\\content.txt"));
+		sc.nextLine();
+		BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("C:\\Users\\deept\\OneDrive\\Documents\\invalidoutput.txt")));
+		BufferedWriter validwriter = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("C:\\Users\\deept\\OneDrive\\Documents\\validoutput.txt")));
+		while(sc.hasNextLine()){
+			String columns[] = sc.nextLine().split("\t");
+			if(invalidLocation.contains(columns[3])){		
+				writer.write(columns[0]+"\t"+columns[1]+"\t"+columns[2]+"\t"+columns[3]);
+				writer.newLine();
+			}
+			else{
+				validwriter.write(columns[0]+"\t"+columns[1]+"\t"+columns[2]+"\t"+columns[3]);
+				validwriter.newLine();
+			}
+		}
+		writer.close();
+		validwriter.close();
+	}
+	public void sel(Map<String, Map<Integer, ArrayList<String>>> contentallocation, String contentweightaddress, String selectionmapaddress, String outputfile) throws FileNotFoundException{
+		Map<String, Integer> contentweight = new HashMap<String, Integer>();
+		Scanner sc = new Scanner(new FileReader(contentweightaddress));
+		sc.nextLine();
+		while(sc.hasNextLine()){
+			String[] columns = sc.nextLine().split("\t");
+			if(!contentweight.containsKey(columns[0])){
+				contentweight.put(columns[0], Integer.parseInt(columns[1]));
+			}
+		}
+		sc.close();	
+		Scanner Sc = new Scanner(new FileReader(selectionmapaddress));
+		Sc.nextLine();
+		while(Sc.hasNextLine()){
+			ArrayList<String> content = new ArrayList<String>();
+			double maximum = 0;
+			String maximumlocation = null;
+			String maximumcontent = null;
+			int contentmax = 0;
+			double total = 0;
+			String[] columns = Sc.nextLine().split("\t");
+			String[] locations = columns[1].split(",");
+			for(int i = 0; i<locations.length; i++){
+				String location = locations[i];
+				if(contentallocation.containsKey(location)){
+					if(contentallocation.get(location).containsKey(Integer.parseInt(columns[0]))){
+						content = contentallocation.get(location).get(Integer.parseInt(columns[0]));
+						for(int j = 0; j<content.size(); j++){
+							int weight = 0;
+							if(contentweight.containsKey(content.get(i))){
+								weight = contentweight.get(content.get(i));
+							}
+							if(contentmax < weight){
+								contentmax = weight;
+								maximumcontent = content.get(i);
+							}
+						}
+					}
+				}
+				switch(location){
+				case "topleft":
+					total = 0.2 * contentmax;
+					break;
+				case "topright":
+					total = 0.7 * contentmax;
+				}
+				if(maximum < total){
+					maximum = total;
+					maximumlocation = location;
+				}
+			}
+			System.out.println(maximum + " for "+columns[0]+" for "+maximumlocation + " for "+maximumcontent);
+		}
+		Sc.close();
+	}
+	public void opt(Map<String, Map<Integer, ArrayList<String>>> contentallocation, Map<String, ArrayList<String>> contentlocation, String newcontentlocation) throws IOException{
+		Scanner sc = new Scanner(new FileReader(newcontentlocation));
+		sc.nextLine();
+		int duration = 0;
+		int endtime = 5;
+		String newcontent = null;
+		while(sc.hasNextLine()){
+			String[] columns = sc.nextLine().split("\t");
+			duration = Integer.parseInt(columns[1]);
+			newcontent = columns[0];
+		}
+		String[] locations = {"topleft","topright"};
+		for(int i=0;i<locations.length;i++){
+			int starttime = 0; 
+			if(contentlocation.containsKey(locations[i])){
+				if(contentlocation.get(locations[i]).contains(newcontent)){
+					continue;
+				}
+				else{
+					if(contentallocation.containsKey(locations[i])){
+						Map<Integer, ArrayList<String>> contenttime = contentallocation.get(locations[i]);
+						for(int j = starttime; j< starttime + duration && j <= endtime; j++){
+							if(contenttime.containsKey(j)){
+								if(contenttime.get(j).size()>2){
+									starttime = j+1;
+								}
+							}
+						}
+						if(endtime-starttime+1 >= duration){
+							int finishtime = starttime + duration - 1;
+							//FileWriter fileWritter = new FileWriter("C:\\Users\\deept\\OneDrive\\Documents\\content.txt",true);
+							BufferedWriter writer = new BufferedWriter(new FileWriter("C:\\Users\\deept\\OneDrive\\Documents\\content.txt", true));
+							writer.newLine();
+							writer.write(newcontent+"\t"+starttime+"\t"+finishtime+"\t"+locations[i]);
+							System.out.println("successfully allocated "+newcontent+" to "+locations[i]);
+							writer.close();
+							break;
+						}
+					}
+				}
+			}
+		}
+	}
+	public static void main(String[] args) throws IOException {
+		Scanner sc = new Scanner(new FileReader("C:\\Users\\deept\\OneDrive\\Documents\\content.txt"));
+		sc.nextLine();
+		Map<String, Map<Integer, ArrayList<String>>>  contentallocation = new HashMap<String, Map<Integer, ArrayList<String>>>();
+		Map<String, ArrayList<String>> contentlocation = new HashMap<String, ArrayList<String>>();
+		while(sc.hasNextLine()){
+			String[] columns = sc.nextLine().split("\t");
+			int starttime = Integer.parseInt(columns[1]);
+			int endtime = Integer.parseInt(columns[2]);
+			for(int i =starttime; i<=endtime;i++){
+				if(contentallocation.containsKey(columns[3])){
+					if(contentallocation.get(columns[3]).containsKey(i)){
+						contentallocation.get(columns[3]).get(i).add(columns[0]);
+					}
+					else{
+						contentallocation.get(columns[3]).put(i, new ArrayList<String>());
+						contentallocation.get(columns[3]).get(i).add(columns[0]);
+					}
+				}
+				else{
+					contentallocation.put(columns[3], new HashMap<Integer, ArrayList<String>>());
+					contentallocation.get(columns[3]).put(i, new ArrayList<String>());
+					contentallocation.get(columns[3]).get(i).add(columns[0]);
+				}
+			}
+			if(contentlocation.containsKey(columns[3])){
+				contentlocation.get(columns[3]).add(columns[0]);
+			}
+			else{
+				contentlocation.put(columns[3], new ArrayList<String>());
+				contentlocation.get(columns[3]).add(columns[0]);
+			}
+		}
+		sc.close();
+		String contentweightaddress = "C:\\Users\\deept\\OneDrive\\Documents\\contentweight.txt";
+		String selectionmapaddress = "C:\\Users\\deept\\OneDrive\\Documents\\selectionmap.txt";
+		String outputfile = "C:\\Users\\deept\\OneDrive\\Documents\\output.txt";
+		String newcontentlocation = "C:\\Users\\deept\\OneDrive\\Documents\\newcontent.txt";
+		rd object = new rd();
+		object.sch(contentallocation, contentlocation);
+		object.sel(contentallocation, contentweightaddress, selectionmapaddress, outputfile);
+		object.opt(contentallocation, contentlocation, newcontentlocation);
+		for(Map.Entry<String, Map<Integer, ArrayList<String>>> entry : contentallocation.entrySet()){
+			Map<Integer, ArrayList<String>> contenttime = entry.getValue();
+			for(Map.Entry<Integer, ArrayList<String>> entry1 : contenttime.entrySet()){
+				System.out.println(entry.getKey() + " " + entry1.getKey() + " " + entry1.getValue());
+			}
+		}
+	}
+
+}

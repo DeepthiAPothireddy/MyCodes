@@ -43,7 +43,7 @@ public class rd {
 		validwriter.close();
 	}
 	public void sel(Map<String, Map<Integer, ArrayList<String>>> contentallocation, String contentweightaddress, String selectionmapaddress, String outputfile) throws FileNotFoundException{
-		Map<String, Integer> contentweight = new HashMap<String, Integer>();
+				Map<String, Integer> contentweight = new HashMap<String, Integer>();
 		Scanner sc = new Scanner(new FileReader(contentweightaddress));
 		sc.nextLine();
 		while(sc.hasNextLine()){
@@ -60,6 +60,7 @@ public class rd {
 			double maximum = 0;
 			String maximumlocation = null;
 			String maximumcontent = null;
+			int currentmax = 0;
 			String[] columns = Sc.nextLine().split("\t");
 			String[] locations = columns[1].split(",");
 			for(int i = 0; i<locations.length; i++){
@@ -78,8 +79,10 @@ public class rd {
 							}
 							if(contentmax < weight){
 								contentmax = weight;
-								maximumcontent = content.get(j);
-								System.out.println(contentmax +" "+maximumcontent);
+								if(currentmax < contentmax){
+									currentmax = contentmax;
+									maximumcontent = content.get(j);
+								}
 							}
 						}
 					}
@@ -91,7 +94,6 @@ public class rd {
 				case "topright":
 					total = 0.1 * contentmax;
 				}
-				System.out.println(total);
 				if(maximum < total){
 					System.out.println(maximum+""+total+""+""+location);
 					maximum = total;
